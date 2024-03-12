@@ -1,13 +1,12 @@
 
-import sys
-sys.path.append('/home/lihongwei/.local/lib/python3.8/site-packages')
+
 import pyasn
 import random
 from Save_ret import save_selectprefixes ,save_proportion
 import ipaddress
 
 
-asndb = pyasn.pyasn('/home/lihongwei/topo/fish/6fish/data/20240115ipasn.dat') #Enter the absolute path to ipasn
+asndb = pyasn.pyasn('data/20240115ipasn.dat') #Enter the absolute path to ipasn
 
 #Query prefix and ASN through pyasn
 def extract_BGP_prefix(prefix):
