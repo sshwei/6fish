@@ -7,7 +7,7 @@ import time
 
 
 YARRP_DIR='/home/lihongwei/topo/fish/yarrp/y1/modified_yarrp/yarrp'#Enter the location of yarrp's startup file
-INTERFACE_NAME='ens3'
+INTERFACE_NAME='ens3'#Fill in your local NIC address
 pps=5000
 m=16
 l=5
