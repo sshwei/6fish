@@ -17,3 +17,6 @@ standard_value is the yield of each type of prefix discovery address.
 It can be set according to the actual situation, but not too large. It is between 0-1. The default is 2%.
 
 Once the above is set up, you just need to run main.py.
+
+
+After the run is done, there will be many yarrp files, you can use parayarrp.py to parse out all the ip addresses found. This of course includes the alias addresses. If you want to avoid most of the aliases, you don't need to parse the yarrp files. The address file is automatically output after main.py finishes running.
