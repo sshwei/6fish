@@ -1,5 +1,5 @@
 6fish is an efficient and simple method for IPv6 topology probing
-As a first step, please install pyasn and yarrp. Of course if you use other probing tools you can also modify the code to adapt to the new probing tools.
+As a first step, please install pyasn and yarrp in python 3.8 or higher. Of course if you use other probing tools you can also modify the code to adapt to the new probing tools.
 For yarrp installation see: https://github.com/cmand/yarrp.git
 For pyasn installation, please refer to: https://github.com/hadiasghari/pyasn.git
 
