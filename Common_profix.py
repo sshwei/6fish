@@ -67,7 +67,7 @@ def extract_common_prefix(addresses):
         if prefix is not None:
             prefix_parts, prefix_length = prefix.split("/")
             prefix_length=int(prefix_length)
-            if prefix_length>64 or prefix_length<16:
+            if prefix_length>64 or prefix_length<16:#Here you can adjust the length of the extracted prefixes
                 result = recover_BGP_prefix(gip(prefix))
                 if result is not None:
                     Recprefixes.add(result)
