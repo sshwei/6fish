@@ -6,8 +6,8 @@ import tempfile
 import time
 
 
-YARRP_DIR='file_path of yarrp/yarrp'#Enter the location of yarrp's startup file
-INTERFACE_NAME='ens3'#Fill in your local NIC address
+YARRP_DIR='/home/lihongwei/topo/fish/yarrp/y1/modified_yarrp/yarrp'#Enter the location of yarrp's startup file
+INTERFACE_NAME='ens3'
 pps=5000
 m=16
 l=5

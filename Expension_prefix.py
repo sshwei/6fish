@@ -70,4 +70,10 @@ def chanpre(prefixes, n, cor):
             pres.extend(future.result())
     return list(set(pres))
 
-
+if __name__ == '__main__':
+    n=4
+    cor=[32, 39, 45, 48, 51, 64]
+    prefixes=['2400:cb00:581::/43']
+    prefixes = chanpre(prefixes,n,cor)
+    print(len(prefixes))
+    print(f"Expanded prefix: {prefixes}")

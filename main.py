@@ -249,7 +249,7 @@ def total_comprefixes(targetpres):
                             logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{lenTH},New Discovered interface number:{tipnum},detecting rate of change to prefix:{round(tipnum/p * 100, 2)}% ")
                             logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ,Duration of this detection:{elapsed_time2:.2f}s ")
                         else:
-                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{lenTH},New Discover interface number:{tipnum},Discover ases:0,Duration of this detection:{elapsed_time2:.2f}s ")
+                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{lenTH},New Discover interface number:{tipnum},Discover ases:0,,Duration of this detection:{elapsed_time2:.2f}s ")
                             logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
                     else:
                         logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with length /{lenTH}")
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     bigbuket=0 # Initial value of the number of addresses for the next round of probing
     buketvol=0 
     cor=[32,64] #Upper and lower coarse grain size limits
-    thresholds = int(0.02 * 100)#High-density area thresholds
+    thresholds = int(0.02 * 100)#High-density area standard value
     HDAA.extend(cor)
     total_budget=50000000 #total budget
     Granularity=1#Prefix expansion granularity
