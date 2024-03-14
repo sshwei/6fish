@@ -6,7 +6,7 @@ import tempfile
 import time
 
 
-YARRP_DIR='/home/lihongwei/topo/fish/yarrp/y1/modified_yarrp/yarrp'#Enter the location of yarrp's startup file
+YARRP_DIR='your yarrp dir/yarrp'#Enter the location of yarrp's startup file
 INTERFACE_NAME='ens3'
 pps=5000
 m=16
@@ -86,19 +86,3 @@ def parse_yarrp_output(YARRP_OUTPUT_DIR) -> tuple:
     return resultlist, packets
 
 
-if __name__ == '__main__':
-    YARRP_OUTPUT_DIR="/home/lihongwei/topo/fish/compare/add_generate_thresholds_cover_g2_auto_cor/data/cor_top6_g2_BGP/yarrp_20240206104216.txt"
-    # YARRP_INPUT_DIR="/home/lihongwei/tools/6fish/testadd.txt"
-    # use_yarrp(YARRP_INPUT_DIR, YARRP_OUTPUT_DIR )
-    start_time=time.time()
-    ret,packet=parse_yarrp_output(YARRP_OUTPUT_DIR)
-    end_time4=time.time()
-    elapsed_time4=end_time4-start_time
-    print(elapsed_time4)
-    # with open("data/output.json", "w") as file:
-    #     json.dump(ret, file)
-
-    # with open("data/output.json", "r") as file:
-    #     ret_from_file = json.load(file)
-
-    # print(ret_from_file)
