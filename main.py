@@ -302,9 +302,9 @@ def total_comprefixes(targetpres):
         return list(set(totalcomps)),packet,prelendict,Tmp_aip,Tmp_naip,Tmp_as
 
 
-def Calculate_coarse(prelendict,cor,standard_value):
+def Calculate_coarse(prelendict,cor,thresholds):
     cor=[32,64]
-    selected_keys = [key for key, value in prelendict.items() if value >= standard_value]
+    selected_keys = [key for key, value in prelendict.items() if value >= thresholds]
     sorted_keys = sorted(selected_keys)
     cor.extend(sorted_keys)
     return cor
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     bigbuket=0 # Initial value of the number of addresses for the next round of probing
     buketvol=0 
     cor=[32,64] #Upper and lower coarse grain size limits
-    standard_value = int(0.02 * 100)#High-density area standard value
+    thresholds = int(0.02 * 100)#High-density area thresholds
     HDAA.extend(cor)
     total_budget=50000000 #total budget
     Granularity=1#Prefix expansion granularity
@@ -420,7 +420,7 @@ if __name__ == '__main__':
             elapsed_time1=end_time1-start_time 
             logger.info(f"round:{lap} Detection completed, Duration of this detection:{elapsed_time1:.2f}s, Accumulated number of packet: {packet} Accumulated interface addresses discovered this time: {len(Discoveradd | NASip)},probing efficiency: {round(len(Discoveradd | NASip) / packet * 100,2)}%,Accumulated number of de-duplicate AS:{len(ASes)}")
            
-            cor=Calculate_coarse(prelendict,cor,standard_value) 
+            cor=Calculate_coarse(prelendict,cor,thresholds) 
             cor=list(set(cor))
             HDAA.extend(cor)
             cor.sort()
