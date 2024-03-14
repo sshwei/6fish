@@ -10,10 +10,10 @@ After that, it's just a matter of setting up the parameters in main.py to suit y
 You can set the standard value of the high density area, the detection budget, and so on.
 
 For example, the total_budget distribution budget can be set to 1M.
-Granularity is the granularity of prefix expansion, which can be set to 1 or larger.
+Granularity is the bit of prefix expansion, which can be set to 1 or larger.
 bigbuket and buketvol default to 0.
-cor is the coarse granularity of prefix expansion, the default setting is [32,64], and it will be adjusted automatically after that.
-standard_value is the yield of each type of prefix discovery address. 
+cor is the expansion bounds of prefix expansion, the default setting is [32,64], and it will be adjusted automatically after that.
+thresholds is the yield of each type of prefix discovery address. 
 It can be set according to the actual situation, but not too large. It is between 0-1. The default is 2%.
 
 Once the above is set up, you just need to run main.py.
