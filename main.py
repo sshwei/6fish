@@ -303,7 +303,7 @@ def total_comprefixes(targetpres):
 
 
 def Calculate_coarse(prelendict,cor,thresholds):
-    cor=[32,64]
+    cor=[64]
     selected_keys = [key for key, value in prelendict.items() if value >= thresholds]
     sorted_keys = sorted(selected_keys)
     cor.extend(sorted_keys)
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     HDAA=[] #high-density address area
     bigbuket=0 # Initial value of the number of addresses for the next round of probing
     buketvol=0 
-    cor=[32,64] #Upper and lower coarse grain size limits
+    cor=[64] #endpoint
     thresholds = int(0.02 * 100)#High-density area standard value
     HDAA.extend(cor)
     total_budget=50000000 #total budget
