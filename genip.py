@@ -38,12 +38,5 @@ def gLip(prefix):
     return ip
 
 
-    
-
-if __name__ == '__main__':
-    pre='2001:1218:6013::/48'
-    ret=gip(pre)
-    print(ret)
-
 
                         
