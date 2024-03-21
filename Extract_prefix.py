@@ -69,7 +69,4 @@ def random_prefix(prefixes,total_samples):
     #print(selected_prefix)
     #print(sample_counts)
 
-if __name__ == '__main__':
-    prefix='2a07:14c0:0000:000b:0001:0000:0000:0001'
-    ret=get_asn(prefix)
-    print(ret)
+
