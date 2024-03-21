@@ -76,13 +76,3 @@ def extract_common_prefix(addresses):
     common_prefix_ipv6_set.update(Recprefixes)
     return list(common_prefix_ipv6_set)
 
-
-if __name__ == '__main__':
-
-    common_prefixess=[]
-    addresses=['2400:cb00:581:3::']
-    iplist=['2001:7fa:0:1::ca28:a0f6']
-    common_prefixess = extract_common_prefix(addresses)
-    print('Common prefix:', common_prefixess)
-    a=process_nasip(iplist)
-    print(a)
