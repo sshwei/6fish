@@ -7,7 +7,7 @@ import time
 
 
 YARRP_DIR='your yarrp dir/yarrp'#Enter the location of yarrp's startup file
-INTERFACE_NAME='ens3'
+INTERFACE_NAME='ens3'  #Please enter the NIC interface
 pps=5000
 m=16
 l=5
