@@ -257,10 +257,10 @@ def total_comprefixes(targetpres):
                             elapsed_time2=end_timef-start_time
 
                             logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{Len},New Discovered interface number:{tipnum},detecting rate of change to prefix:{round(tipnum/p * 100, 2)}% ")
-                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ,Duration of this detection:{elapsed_time2:.2f}s ")
+                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ,Duration of this detection:{elapsed_time2:.2f}s ")
                         else:
                             logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{Len},New Discover interface number:{tipnum},Discover ases:0,Duration of this detection:{elapsed_time2:.2f}s ")
-                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
                     else:
                         logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with length /{Len}")
                         continue
@@ -304,10 +304,10 @@ def total_comprefixes(targetpres):
                     Tmp_as.update(AS)
                 else:
                     logger.info(f"round:{lap}.{cround} ===  Detection completed,Prefixes with length (length<32 and length>64),Discover interface number:{NCTip},Discover ases:0,Duration of this detection:{elapsed_time3:.2f}s ")
-                    logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+                    logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
             else:
                 logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with (length<32 and length>64)")
-        logger.info(f"round:{lap}=== Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+        logger.info(f"round:{lap}=== Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
         logger.info(f"round:{lap}=== Detection completed")
         return list(set(totalcomps)),packet,prelendict,Tmp_aip,Tmp_naip,Tmp_as
     
@@ -325,12 +325,12 @@ if __name__ == '__main__':
     start_time = time.time()
     logger.info("start_time:%s,Reading target prefixes",time.ctime(start_time))
     #Read target prefixes
-    with open('target_prefixes', 'r') as file:#Enter the file of target prefix
+    with open('data/testpre.txt', 'r') as file:#Enter the file of target prefix
         for line in file:
             prefix = line.strip()
             totalfrefixes.add(prefix)
             #read target address
-    targetfile = "taget_addresses"# Enter the file of target address
+    targetfile = "data/testadd.txt"# Enter the file of target address
     # bigbuket=len(totalfrefixes)
     HDAA=[] #high-density address area
     bigbuket=0 

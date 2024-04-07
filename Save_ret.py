@@ -1,6 +1,6 @@
 import time
-import pickle
 import os
+
 def save_result(result_name,result):
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
     result_file = "data/"+result_name+ timestamp +".txt"
