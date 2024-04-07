@@ -2,7 +2,7 @@
 
 import pyasn
 import random
-from Save_ret import save_selectprefixes ,save_proportion
+from Save_ret import save_result ,save_proportion
 import ipaddress
 
 
@@ -61,12 +61,11 @@ def random_prefix(prefixes,total_samples):
     # Perform weighted random sampling
     selected_keys = random.choices(list(prefix_dict.keys()), weights=normalized_weights, k=total_samples)
     # Extract corresponding values
-    selected_values = [random.choice(prefix_dict[key]) for key in selected_keys]
-    save_selectprefixes(selected_values)
+    selectprefixes = [random.choice(prefix_dict[key]) for key in selected_keys]
+    result_name='selectprefixes'
+    save_result(result_name,selectprefixes)
     # Print the number and proportion of selected prefixes for each key, and save the results to a file
     save_proportion(prefix_dict,sample_counts,total_samples,len(prefixes))
-    return selected_values
-    #print(selected_prefix)
-    #print(sample_counts)
+    return selectprefixes
 
 

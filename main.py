@@ -4,7 +4,7 @@ from Save_ret import *
 from yarrp import *
 from genip import *
 import time
-from collections import OrderedDict
+from collections import defaultdict
 from Common_profix import *
 from Expension_prefix import *
 import collections
@@ -15,7 +15,7 @@ from tqdm import tqdm
 import concurrent.futures
 from concurrent.futures import ProcessPoolExecutor
 
-# ases= collections.OrderedDict()
+
 NASip=set()#In order to store IP addresses that cannot be found with AS numbers
 Discoveradd=set()#In order to store nodes with AS discovered
 totalfrefixes=set()
@@ -25,6 +25,8 @@ ComPre=set()#To store the common prefix of each discovered IP group
 
 
 def process_item(item):
+    global totalfrefixes
+    # if item not in totalfrefixes and item is not None:
     if item is not None:
         ip = gip(item)
         if ip is not None:  
@@ -41,29 +43,29 @@ def parallel_processing(chapres):
                     Neip.append(result)
     return Neip 
 
- 
 def group_ip(final_ip_list):
     global Discoveradd #Number of discovered interface
     global NASip
     global ASes
 
-    ases= collections.OrderedDict()
+    ases= defaultdict(list)
+    tmpas=defaultdict(list)
     tmp_nasip=[]
     tmp_naip=set()
     tmp_aip=set()
     tmpadd=set()
-    tmpas=collections.OrderedDict()
+   
     Dadd=set()
     Dadd=Discoveradd|NASip
     
     tmpadd=(Dadd|set(final_ip_list))-Dadd
     for ip in final_ip_list:
         as_number = get_asn(ip)
-        if as_number:
+        if as_number and as_number!=23910: #23910 is Probe Local ASN
             if as_number not in ASes:
-                ases[as_number]=[ip]
-            elif as_number in ASes and as_number!=23910: #23910 is Probe Local ASN
-                tmpas[as_number]=[ip]                 
+                ases[as_number].append(ip)
+            else:
+                tmpas[as_number].append(ip)               
         elif as_number is None and ip not in NASip:
             tmp_nasip.append(ip)
             tmp_naip.add(ip)
@@ -78,16 +80,17 @@ def group_ip(final_ip_list):
         tmp_aip=tmpadd-tmp_naip
     return ases,tmp_nasip,len(tmpadd),tmp_aip,tmp_naip
 
-
-def collect_ip(ip_list):
-    ip_lst=[]
-    for ip_entry in ip_list:
-            ip_lst.append(ip_entry[0]) 
-    return ip_lst
-
+def deduplicate_list(lst):
+    seen = set()
+    result = []
+    for item in lst:
+        if item not in seen:
+            result.append(item)
+            seen.add(item)
+    return result
 
 def process_results(results):
-    temp_dict = collections.OrderedDict()
+    temp_dict= defaultdict(list)
     tmp_nasip = []
     ipnum = 0
     tmp_aip = set()
@@ -98,19 +101,32 @@ def process_results(results):
         for future in concurrent.futures.as_completed(futures):
             result = future.result()
             for key, value in result[0].items():
-                if key in temp_dict and temp_dict[key] != value:
+                if key in temp_dict and set(temp_dict[key]) != set(value):
                     if isinstance(temp_dict[key], list):
                         temp_dict[key].extend(value)
                     else:
                         temp_dict[key] = [temp_dict[key], value]
                 else:
-                    temp_dict[key] = value
+                    temp_dict[key].extend(value)
             tmp_nasip.extend(result[1])
             ipnum += result[2]
             tmp_aip.update(result[3])
             tmp_naip.update(result[4])
-
+    for key, value in temp_dict.items():
+        temp_dict[key]= deduplicate_list(value)
+    tmp_nasip=deduplicate_list(tmp_nasip)
+    print(temp_dict)
     return temp_dict, tmp_nasip, ipnum, tmp_aip, tmp_naip
+
+def collect_ip(ip_list):
+    ip_lst=[]
+    if len(ip_list)>1:
+        for i in range(len(ip_list)-1):
+            if ip_list[i][0]!=ip_list[i+1][0]:
+                ip_lst.append(ip_list[i][0]) 
+    ip_lst.append(ip_list[-1][0])
+    return ip_lst
+
 
 def get_New_ipdict(ip_lists,l):
     temp_dict=collections.OrderedDict()
@@ -119,16 +135,17 @@ def get_New_ipdict(ip_lists,l):
         with ProcessPoolExecutor() as executor:
             results = executor.map(collect_ip, [iplist for iplist in ip_lists])
         temp_dict,tmp_nasip,ipnum,tmp_aip,tmp_naip=process_results(results)
+
         save_lenth_Disasadd(tmp_aip|tmp_naip,l)
         return temp_dict,tmp_nasip,ipnum,tmp_aip,tmp_naip
+
 
 def topo_AS_Comprefix(temp_dict,tmp_nasip):
     global ComPre
     start_timec=time.time()
     pres=[]
     AS=set()
-    if temp_dict or tmp_nasip:
-        pres.extend(process_nasip(tmp_nasip))
+    if temp_dict:
         with ProcessPoolExecutor() as executor: 
             futures = []
             for as_num, ip_lst in temp_dict.items():
@@ -146,7 +163,7 @@ def topo_AS_Comprefix(temp_dict,tmp_nasip):
     return list(preset),AS
 
 
-def class_prefixes(pfixes):
+def clsass_prefixes(pfixes):
     if len(pfixes)>0:
         prefixes_by_length = {}
         for pfix in pfixes:
@@ -166,6 +183,7 @@ def total_comprefixes(targetpres):
     global packet
     global total_budget
     global lap
+    global start_time
         
     totalcomps=[]
     Prx=[]
@@ -176,41 +194,31 @@ def total_comprefixes(targetpres):
     cround=0
     Len=0
     lenprefixes=0
+    elapsed_time2=0.0
 
-    end_timed=time.time()
-    
-    prefixes_by_length=class_prefixes(targetpres) 
-    elapsed_time=end_timed-end_timeb
-    logger.info(f"duration:{elapsed_time:.2f}s,Prefixes are categorized")
+    prefixes_by_length=clsass_prefixes(targetpres) 
+    logger.info(f"Prefixes are categorized")
     
     if prefixes_by_length:
         prelendict={}
         for length, prfs in prefixes_by_length.items():
             lenprefixes=len(prfs)
             Len=int(length)
-            if (Len >= 32 and Len <=64) and lenprefixes >0: 
+            if (Len >= 32 and Len <=64) and lenprefixes >0:
+                add_by_prefix_class=parallel_processing(prfs)   
+                logger.info(f"Address generation is complete for this class prefix.")
 
-                start_timee=time.time()
-                add_by_prefix_class=parallel_processing(prfs)
-                end_timee=time.time()
-                elapsed_time=end_timee-start_timee
-                logger.info(f"duration:{elapsed_time:.2f}s,Address generation is complete for this class prefix.")
-
+                start_timef=time.time()
                 if len(add_by_prefix_class)>0:
                     resultlist,p=trcacerout(add_by_prefix_class)
-
-                    end_time2=time.time()
-                    elapsed_time2=end_time2-start_time
-
                     end_timef=time.time()
-                    elapsed_time=end_timef-end_timee
+                    elapsed_time=end_timef-start_timef
                     logger.info(f"duration:{elapsed_time:.2f}s,This type of target address has been detected.")
 
                     cround+=1
-                    packet+=p #Record the total number of packages sent
+                    packet+=p 
                     if packet >=total_budget:
                         lidict,linasip,tipnum,tmp_aip,tmp_naip=get_New_ipdict(resultlist,Len)
-                        lenTH=Len
                         prelendict[Len]=int(round(tipnum/p * 100, 2))
                         if tipnum>0:
                             compres,AS=topo_AS_Comprefix(lidict,linasip)
@@ -221,15 +229,14 @@ def total_comprefixes(targetpres):
                         break
                     if len(resultlist)>0:
                         
+                        start_timee=time.time()
                         lidict,linasip,tipnum,tmp_aip,tmp_naip=get_New_ipdict(resultlist,Len)
-
                         end_timee=time.time()
-                        elapsed_time=end_timee-end_timef
+                        elapsed_time=end_timee-start_timee
                         logger.info(f"duration:{elapsed_time:.2f}s,Separation of detection results complete.")
 
-                        lenTH=Len
                         prelendict[Len]=int(round(tipnum/p * 100, 2))
-
+                       
                         end_timef=time.time()
                         elapsed_time=end_timef-end_timee
                         logger.info(f"duration:{elapsed_time:.2f}s,Yield calculation completed.")
@@ -246,13 +253,16 @@ def total_comprefixes(targetpres):
                             Tmp_naip.update(tmp_naip)
                             Tmp_as.update(AS)
 
-                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{lenTH},New Discovered interface number:{tipnum},detecting rate of change to prefix:{round(tipnum/p * 100, 2)}% ")
-                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ,Duration of this detection:{elapsed_time2:.2f}s ")
+                            end_timef=time.time()
+                            elapsed_time2=end_timef-start_time
+
+                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{Len},New Discovered interface number:{tipnum},detecting rate of change to prefix:{round(tipnum/p * 100, 2)}% ")
+                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ,Duration of this detection:{elapsed_time2:.2f}s ")
                         else:
-                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{lenTH},New Discover interface number:{tipnum},Discover ases:0,,Duration of this detection:{elapsed_time2:.2f}s ")
-                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+                            logger.info(f"round:{lap}.{cround} === Detection completed,Prefixes with length /{Len},New Discover interface number:{tipnum},Discover ases:0,Duration of this detection:{elapsed_time2:.2f}s ")
+                            logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
                     else:
-                        logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with length /{lenTH}")
+                        logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with length /{Len}")
                         continue
             else:
                 Prx.extend(prfs)
@@ -294,46 +304,46 @@ def total_comprefixes(targetpres):
                     Tmp_as.update(AS)
                 else:
                     logger.info(f"round:{lap}.{cround} ===  Detection completed,Prefixes with length (length<32 and length>64),Discover interface number:{NCTip},Discover ases:0,Duration of this detection:{elapsed_time3:.2f}s ")
-                    logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+                    logger.info(f"round:{lap}.{cround} === Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
             else:
                 logger.info(f"round:{lap}.{cround} === no route to the target,Prefixes with (length<32 and length>64)")
-        logger.info(f"round:{lap}=== Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},probing efficiency:{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
+        logger.info(f"round:{lap}=== Addresses cumulative discovery:{len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)},ASes cumulative discovery:{len(Tmp_as|ASes)},packet cumulative sent:{packet},Detection rate :{round((len(Tmp_aip)+len(Tmp_naip)+len(Discoveradd|NASip)) / packet * 100, 2)}% ")
         logger.info(f"round:{lap}=== Detection completed")
         return list(set(totalcomps)),packet,prelendict,Tmp_aip,Tmp_naip,Tmp_as
+    
 
-
-def Calculate_coarse(prelendict,cor,thresholds):
+def Calculate_coarse(prelendict,cor):
     cor=[64]
-    selected_keys = [key for key, value in prelendict.items() if value >= thresholds]
+    threshold = int(0.02 * 100)  
+    selected_keys = [key for key, value in prelendict.items() if value >= threshold]
     sorted_keys = sorted(selected_keys)
     cor.extend(sorted_keys)
     return cor
-    
-      
-            
-if __name__ == '__main__':
 
+
+if __name__ == '__main__':
     start_time = time.time()
     logger.info("start_time:%s,Reading target prefixes",time.ctime(start_time))
     #Read target prefixes
-    with open('data/testpre.txt', 'r') as file:
+    with open('target_prefixes', 'r') as file:#Enter the file of target prefix
         for line in file:
             prefix = line.strip()
-            totalfrefixes.add(prefix) 
-    #read target address
-    targetfile = "data/testadd.txt"
+            totalfrefixes.add(prefix)
+            #read target address
+    targetfile = "taget_addresses"# Enter the file of target address
+    # bigbuket=len(totalfrefixes)
     HDAA=[] #high-density address area
-    bigbuket=0 # Initial value of the number of addresses for the next round of probing
+    bigbuket=0 
     buketvol=0 
-    cor=[64] #endpoint
-    thresholds = int(0.02 * 100)#High-density area standard value
+    cor=[64] 
     HDAA.extend(cor)
-    total_budget=50000000 #total budget
-    Granularity=1#Prefix expansion granularity
+    total_budget=50000 #Setting the total number of packages to be sent
+    Granularity=2 #Prefix expansion granularity
     packet=0
     lap=1
 
-    logger.info(f"Total read target prefixes:{len(totalfrefixes)} ,general budget:{total_budget} ,Initial prefix expansion granularity:{Granularity},initial coares:{cor}")  
+    logger.info(f"Total read target prefixes:{len(totalfrefixes)} ,general budget:{total_budget} ,Initial prefix expansion granularity:{Granularity},initial coares:{cor}")
+    
     resultlist,p=first_detect(targetfile)
 
     end_timea=time.time()
@@ -341,7 +351,7 @@ if __name__ == '__main__':
     logger.info(f"duration:{elapsed_time:.2f}s,first detection complete.")
 
     packet+=p
-    lee=0 #prefix category
+    lee=0 # the length of prefixes
     tmpd,tmpn,tmpm,tmpaip,tmpnaip=get_New_ipdict(resultlist,lee)
 
     end_timeb=time.time()
@@ -364,7 +374,7 @@ if __name__ == '__main__':
 
     end_time0=time.time()
     elapsed_time0=end_time0-start_time
-    logger.info(f"round{lap} Detection completed,Prefix expansion granularity:{Granularity}, Duration of this detection:{elapsed_time0:.2f}s, Accumulated number of packet: {packet}, Accumulated interface addresses discovered this time: {len(Discoveradd | NASip)} The probing efficiency: {round(len(Discoveradd | NASip) / packet * 100,2)}%,Accumulated number of de-duplicate AS:{len(ASes)}")
+    logger.info(f"round{lap} Detection completed,Prefix expansion granularity:{Granularity}, Duration of this detection:{elapsed_time0:.2f}s, Accumulated number of packet: {packet}, Accumulated interface addresses discovered this time: {len(Discoveradd | NASip)} The detection rate: {round(len(Discoveradd | NASip) / packet * 100,2)}%,Accumulated number of de-duplicate AS:{len(ASes)}")
     
     with tqdm(total_budget) as pbar:
         while True:
@@ -377,6 +387,7 @@ if __name__ == '__main__':
                 break
             if buketvol>=bigbuket:
                 bigbuket=buketvol
+
                 totalfrefixes.update(set(chanpres))
                 end_timea=time.time()
                 elapsed_time=end_timea-end_timeb
@@ -386,7 +397,8 @@ if __name__ == '__main__':
                 samplenum=bigbuket-buketvol
                 old_pres=random_prefix(totalfrefixes,samplenum)
                 totalfrefixes.update(set(chanpres))
-                save_totalprefixes(totalfrefixes)
+                result_name='totalprefixes'
+                save_result(result_name,totalfrefixes)
                 
                 end_timea=time.time()
                 elapsed_time=end_timea-end_timeb
@@ -418,9 +430,9 @@ if __name__ == '__main__':
             
             end_time1= time.time()
             elapsed_time1=end_time1-start_time 
-            logger.info(f"round:{lap} Detection completed, Duration of this detection:{elapsed_time1:.2f}s, Accumulated number of packet: {packet} Accumulated interface addresses discovered this time: {len(Discoveradd | NASip)},probing efficiency: {round(len(Discoveradd | NASip) / packet * 100,2)}%,Accumulated number of de-duplicate AS:{len(ASes)}")
+            logger.info(f"round:{lap} Detection completed, Duration of this detection:{elapsed_time1:.2f}s, Accumulated number of packet: {packet} Accumulated interface addresses discovered this time: {len(Discoveradd | NASip)},detection rate: {round(len(Discoveradd | NASip) / packet * 100,2)}%,Accumulated number of de-duplicate AS:{len(ASes)}")
            
-            cor=Calculate_coarse(prelendict,cor,thresholds) 
+            cor=Calculate_coarse(prelendict,cor)
             cor=list(set(cor))
             HDAA.extend(cor)
             cor.sort()
@@ -441,15 +453,20 @@ if __name__ == '__main__':
     end_time = time.time()
     elapsed_time = end_time - start_time
     logger.info("star_time:%s,end_time:%s", time.ctime(start_time),time.ctime(end_time))
-    # save_as(ases)
-    save_Disasadd(Discoveradd)
-    save_NASip(NASip)
-    save_totalprefixes(totalfrefixes)
-    Disadd=Discoveradd|NASip
-    save_Alldisadd(Disadd)
+    result_name='Discoveradd' #Save those addresses where you can look up ASNs
+    save_result(result_name,Discoveradd)
+    result_name='No_ASN_ip' #Save those addresses without an ASN
+    save_result(result_name,NASip)
+    result_name='totalprefixes'#Save all prefixes
+    save_result(result_name,totalfrefixes)
+    Disadd=Discoveradd|NASip #Save all addresses
+    result_name='Alldisadd'
+    save_result(result_name,Disadd)
     print(HDAA)
-    logger.info(f"Total detection time: {elapsed_time:.2f}s  total {lap} round Prefix expansion granularity:{Granularity}, Discovered total number of interface addresses: {len(Disadd)}, probing efficiency: {round(len(Discoveradd | NASip) / packet * 100,2)}%, Accumulated number of packet: {packet},Accumulated number of de-duplicate AS:{len(ASes)}")
+    logger.info(f"Total detection time: {elapsed_time:.2f}s  total {lap} round Prefix expansion granularity:{Granularity}, Discovered total number of interface addresses: {len(Disadd)}, detection rate: {round(len(Discoveradd | NASip) / packet * 100,2)}%, Accumulated number of packet: {packet},Accumulated number of de-duplicate AS:{len(ASes)}")
     logger.info('all taskes completed')
+
+
 
 
 

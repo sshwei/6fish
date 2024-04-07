@@ -25,10 +25,9 @@ def operate_yarrp_file(directory):
                 if ip not in Discoveradd:
                     tmp1.add(ip)
                     Discoveradd.add(ip)
-        # save_Disasadd(tmp1)
-        # save_gAses(as1)
-    save_Alldisadd(Discoveradd)
-
+    result_name='Alldisadd'
+    save_result(result_name,Discoveradd)
+ 
 if __name__ == '__main__':
     directory_path = "" #Enter the yarrp file directory
     operate_yarrp_file(directory_path)

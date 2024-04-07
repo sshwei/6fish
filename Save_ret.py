@@ -1,32 +1,12 @@
 import time
 import pickle
 import os
-def save_gAses(ASes):
+def save_result(result_name,result):
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    outputfile="data/ASes"+ timestamp +".txt"
-    #Write ASes to file
-    with open(outputfile, "w") as file:
-        file.write("\n".join(str(item) for item in ASes) + "\n")
-        
-def save_as(ases):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    filenameoutput = "data/ases" + timestamp + ".pickle"
-    with open(filenameoutput, 'wb') as file:
-        pickle.dump(ases, file)
-
-def save_NASip(NASip):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    outputfile="data/NASip"+ timestamp +".txt"
-    #Write NASip to file
-    with open(outputfile, "w") as file:
-        file.write("\n".join(list(NASip)) + "\n")
-
-def save_Disasadd(Disasadd):
-     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-     #Write Disadd to file
-     Disadd_file="data/Disasadd"+ timestamp +".txt"
-     with open(Disadd_file, "w") as file:
-        file.write("\n".join(list(Disasadd)) + "\n")
+    result_file = "data/"+result_name+ timestamp +".txt"
+    with open(result_file, "w") as file:
+        string_result = [str(item) for item in result]
+        file.write("\n".join(list(string_result)) + "\n")
 
 def save_lenth_Disasadd(Disasadd,plength):
      timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -35,26 +15,6 @@ def save_lenth_Disasadd(Disasadd,plength):
      with open(Disadd_file, "w") as file:
         file.write("\n".join(list(Disasadd)) + "\n")
 
-def save_Alldisadd(Discoveradd):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    Discoveradd_file = "data/Alldisadd"+ timestamp +".txt"
-    # Write Discoveradd to file
-    with open(Discoveradd_file, "w") as file:
-        file.write("\n".join(list(Discoveradd)) + "\n")
-
-def save_totalprefixes(totalprefix):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    totalprefix_file="data/totalprefix"+ timestamp +".txt"
-    #Write the discovered and expanded prefix to a file
-    with open(totalprefix_file, "w") as file:
-        file.write("\n".join(list(totalprefix)) + "\n")
-
-def save_selectprefixes(totalprefix):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    selectprefix_file="data/selectprefix"+ timestamp +".txt"
-    #Write the discovered and expanded prefix to a file
-    with open(selectprefix_file, "w") as file:
-        file.write("\n".join(list(totalprefix)) + "\n")
 
 def save_proportion(prefix_dict,sample_counts,total_samples,lentotalprefixes):
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -65,6 +25,7 @@ def save_proportion(prefix_dict,sample_counts,total_samples,lentotalprefixes):
             totalproportion=count/lentotalprefixes
             result = f"Prefix Length: {key},Number of Prefixes Selected: {count},Proportion to total sampling: {proportion:.2%},Proportion of all prefixes:{totalproportion:.2%}"
             file.write(result + "\n")
+
 
 def save_topolist(ip_lists):
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -86,14 +47,6 @@ def save_topolist(ip_lists):
         file.write(output_text)
 
 
-
-def save_accumulate_ases(ASes):
-    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    outputfile="data/ASes"+ timestamp +".txt"
-    #Write ASes to file
-    with open(outputfile, "w") as file:
-        file.write("\n".join(str(item) for item in ASes) + "\n")
-    return outputfile
 
 def read_accumulate_ases(filename):
     ases = set()

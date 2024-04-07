@@ -18,16 +18,17 @@ def binary_to_ipv6(binary_str):
     ipv6_prefix = ipv6_network.with_prefixlen
     return str(ipv6_prefix)
 
-def process_nasip(iplist):
+def process_nasip(iplist,length):
     binary_addresses = []
     prefix_ipv6=set()
     for ip in iplist:
         if is_global_unicast_ipv6(ip):
             ip = ipaddress.IPv6Address(ip)
             binary_addresses.append(format(int(ip), '0128b'))
-            prefix_ipv6_32=binary_to_ipv6(binary_addresses[0][:32])
+            prefix_ipv6_32=binary_to_ipv6(binary_addresses[0][:length])
             prefix_ipv6.add(prefix_ipv6_32)
-    return list(prefix_ipv6)
+    return prefix_ipv6
+
 
 def extract_common_prefix(addresses):
     # Store IPv6 addresses in binary representation
