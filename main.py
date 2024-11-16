@@ -314,7 +314,9 @@ def total_comprefixes(targetpres):
 
 def Calculate_coarse(prelendict,cor):
     cor=[64]
-    threshold = int(0.02 * 100)  
+    values = prelendict.values() 
+    threshold = sum(values) / len(values) 
+    #threshold = int(0.02 * 100)  
     selected_keys = [key for key, value in prelendict.items() if value >= threshold]
     sorted_keys = sorted(selected_keys)
     cor.extend(sorted_keys)
