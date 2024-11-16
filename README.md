@@ -14,7 +14,7 @@ Granularity is the bit of prefix expansion, which can be set to 1 or larger.
 bigbuket and buketvol default to 0.
 cor is the endpoint of prefix expansion, the default setting is [64].
 thresholds is the yield of each type of prefix discovery address. 
-It can be set according to the actual situation, but not too large. It is between 0-1. The default is 2%.
+It can be set according to the actual situation, but not too large. It is between 0-1. 
 
 Once the above is set up, you just need to run main.py.
 
